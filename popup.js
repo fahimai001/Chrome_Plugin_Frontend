@@ -1,9 +1,8 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const outputDiv = document.getElementById("output");
-    const API_KEY = 'Your_API_Key';  // Replace with your actual YouTube Data API key
-    const API_URL = 'http://localhost:5000';  // Replace with your actual backend URL
+    const API_KEY = 'Your_API_Key'; 
+    const API_URL = 'http://localhost:5000';  
 
-    // Get the current tab's URL
     chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
         const url = tabs[0].url;
         const youtubeRegex = /^https:\/\/(?:www\.)?youtube\.com\/watch\?v=([\w-]{11})/;
@@ -34,7 +33,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                     });
                 });
 
-                // Compute metrics
                 const totalComments = comments.length;
                 const uniqueCommenters = new Set(comments.map(comment => comment.authorId)).size;
                 const totalWords = comments.reduce((sum, comment) => sum + comment.text.split(/\s+/).filter(word => word.length > 0).length, 0);
@@ -42,7 +40,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const avgSentimentScore = (totalSentimentScore / totalComments).toFixed(2);
                 const normalizedSentimentScore = (((parseFloat(avgSentimentScore) + 1) / 2) * 10).toFixed(2);
 
-                // Add the Comment Analysis Summary section
                 outputDiv.innerHTML += `
                     <div class="section">
                         <div class="section-title">Comment Analysis Summary</div>
@@ -55,7 +52,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                     </div>
                 `;
 
-                // Add the Sentiment Analysis Results section
                 outputDiv.innerHTML += `
                     <div class="section">
                         <div class="section-title">Sentiment Analysis Results</div>
@@ -64,7 +60,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                     </div>`;
                 await fetchAndDisplayChart(sentimentCounts);
 
-                // Add Sentiment Trend Graph section
                 outputDiv.innerHTML += `
                     <div class="section">
                         <div class="section-title">Sentiment Trend Over Time</div>
@@ -72,7 +67,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                     </div>`;
                 await fetchAndDisplayTrendGraph(sentimentData);
 
-                // Add Word Cloud section
                 outputDiv.innerHTML += `
                     <div class="section">
                         <div class="section-title">Comment Wordcloud</div>
@@ -80,7 +74,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                     </div>`;
                 await fetchAndDisplayWordCloud(comments.map(comment => comment.text));
 
-                // Top comments section
                 outputDiv.innerHTML += `
                     <div class="section">
                         <div class="section-title">Top 25 Comments with Sentiments</div>
@@ -103,6 +96,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         let pageToken = "";
         try {
             while (comments.length < 500) {
+                
                 const response = await fetch(`https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId=${videoId}&maxResults=100&pageToken=${pageToken}&key=${API_KEY}`);
                 const data = await response.json();
                 if (data.items) {
@@ -143,5 +137,4 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
-    // The rest of the functions (fetchAndDisplayChart, fetchAndDisplayWordCloud, fetchAndDisplayTrendGraph) remain the same as your previous code.
 });
